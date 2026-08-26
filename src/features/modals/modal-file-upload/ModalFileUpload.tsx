@@ -8,6 +8,8 @@ import { EStatusPost } from "../../../services/posts/type";
 import { createPostCaller } from "../../../services/posts/create-post/create-post.svc";
 import { useYupForm } from "../../../hook/useYupForm";
 import { schemaCreatePost } from "./schema";
+import { useApiResult } from "../../../hook/api/useApiResult";
+import { meSvcCaller } from "../../../services/auth/me/me.svc";
 
 export interface ModalFileUploadProps {
   open?: boolean;
@@ -28,6 +30,8 @@ const ModalFileUpload: React.FC<ModalFileUploadProps> = ({
 
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
+
+  const { data: userData } = useApiResult(meSvcCaller);
   
   const { register, handleSubmit, getError, setValue, isSubmitting, reset } = useYupForm({
     schema: schemaCreatePost,
@@ -39,7 +43,7 @@ const ModalFileUpload: React.FC<ModalFileUploadProps> = ({
     onSubmit: async (values) => {
       try {
         await createPostCaller.execute({
-          user_id: "679f228d-f5f1-4f91-88f5-d5c5a0839e55",
+          user_id: userData?.id ?? '',
           ...values,
         });
         onSuccess?.();
@@ -100,8 +104,8 @@ const ModalFileUpload: React.FC<ModalFileUploadProps> = ({
             <FileUpload
               label="Media"
               onFileChange={(entries) => {
-                const successfulEntry = entries.find(e => e.status === "success");
-                setValue("mediaUrl", successfulEntry?.url || "");
+                const successEntry = entries.find((entry) => entry.status === "success");
+                setValue("mediaUrl", successEntry?.url || "");
               }}
               multiple={false}
             />

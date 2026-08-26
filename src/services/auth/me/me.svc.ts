@@ -3,12 +3,12 @@ import { API_AUTH_ROUTERS } from "../router";
 import type { IMeRequest, IMeResponse } from "./me.type";
 
 class MeSvcCaller extends RxAxiosCaller<
-  IMeResponse['data'],
+  IMeResponse,
   IMeRequest,
   IMeResponse
 > {
   constructor() {
-    super(API_AUTH_ROUTERS.GET.ME, "GET", (raw) => raw.data)
+    super(API_AUTH_ROUTERS.GET.ME, "GET", (raw) => raw)
   }
 }
 

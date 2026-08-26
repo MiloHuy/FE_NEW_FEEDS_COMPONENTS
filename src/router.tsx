@@ -4,11 +4,16 @@ import RegisterPage from "./pages/register/RegisterPage";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import AuthWrapper from "./organisms/auth-wrapper/AuthWrapper";
 import GuestWrapper from "./organisms/guest-wrapper/GuestWrapper";
+import { PageTest } from "./pages/test";
 
 const routers: RouteObject[] = [
   {
     element: <GuestWrapper />,
     children: [
+      {
+        path: "/test",
+        element: <PageTest />,
+      },
       {
         path: "/",
         element: <LoginPage />,

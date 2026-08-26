@@ -3,10 +3,10 @@ import type { TApiResult } from "../type";
 export type TUploadFileType = "IMAGE" | "VIDEO" | "OTHER"
 
 export type IUploadFileRequest = FormData | {
-  files: File[]
+  file: File[]
 }
 
-export interface IUploadFileResponse extends TApiResult<{
+export type IUploadFileResponse = TApiResult<{
   url: string
   type: TUploadFileType
-}> { }
+}>

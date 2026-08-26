@@ -26,6 +26,7 @@ export function useYupForm<T extends yup.AnyObjectSchema>({
     getValues,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: yupResolver(schema) as any,
     defaultValues: (defaultValues ?? {}) as FormValues,
   });
@@ -40,11 +41,13 @@ export function useYupForm<T extends yup.AnyObjectSchema>({
     return err?.message as string | undefined;
   };
   const setFieldError = (fieldName: keyof FormValues, message: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setError(fieldName as any, { type: "manual", message });
   };
 
   const clearError = (fieldName?: keyof FormValues) => {
     if (fieldName) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       clearErrors(fieldName as any);
     } else {
       clearErrors();

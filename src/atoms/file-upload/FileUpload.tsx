@@ -26,14 +26,27 @@ const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(
     ref
   ) => {
     const inputRef = useRef<HTMLInputElement>(null);
+    
+    const onFileChangeRef = useRef<FileUploadProps["onFileChange"]>(onFileChange);
+    const didMountRef = useRef(false);
+    
     const [entries, setEntries] = useState<FileEntry[]>([]);
     const [validationError, setValidationError] = useState<string | null>(null);
 
     const maxBytes = maxSizeMB * 1024 * 1024;
 
     useEffect(() => {
-      onFileChange?.(entries);
-    }, [entries, onFileChange]);
+      onFileChangeRef.current = onFileChange;
+    }, [onFileChange]);
+
+    useEffect(() => {
+      if (!didMountRef.current) {
+        didMountRef.current = true;
+        return;
+      }
+
+      onFileChangeRef.current?.(entries);
+    }, [entries]);
 
     const handleChange = useCallback(
       async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +90,7 @@ const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(
         try {
           const formData = new FormData();
           next.forEach((file) => {
-            formData.append("files", file);
+            formData.append("file", file);
           });
 
           const response = await uploadFileCaller.execute(formData);

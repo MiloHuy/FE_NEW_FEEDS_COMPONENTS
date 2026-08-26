@@ -6,7 +6,7 @@ export const API_POST_ROUTERS = {
     LIST: PREFIX_POSTS
   },
   POST: {
-    CREATE: "",
+    CREATE: "/posts",
     LIKE: "/{id}/like"
   }
 }

@@ -3,11 +3,11 @@ import { API_POST_ROUTERS } from "../router";
 import type { IListPostsRequest, IListPostsResponse } from "./list-post.type";
 
 class ListPostsCaller extends RxAxiosCaller<
-  IListPostsResponse['data'],
+  IListPostsResponse['data']['content'],
   IListPostsRequest,
   IListPostsResponse> {
   constructor() {
-    super(API_POST_ROUTERS.GET.LIST, "GET", (raw) => raw.data)
+    super(API_POST_ROUTERS.GET.LIST, "GET", (raw) => raw.data.content)
   }
 }
 
