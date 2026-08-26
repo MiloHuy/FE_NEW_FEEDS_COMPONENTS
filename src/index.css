@@ -14,6 +14,7 @@
 @import './style/components/atoms/box.scss';
 @import './style/components/atoms/avatar.scss';
 @import './style/components/atoms/base-modal.scss';
+@import './style/components/atoms/toast.scss';
 
 @import './style/components/molecules/card-post.scss';
 

@@ -16,9 +16,13 @@ const FormLogin= ()=> {
     onSubmit: async (values) => {
       try {
         const res = await loginSvcCaller.execute(values);
-        const token = res?.accessToken
-        if (token) {
-          setTokenInCookie(SSOCOOKIES.ACCESS_TOKEN, token);
+        if (res?.accessToken) {
+          setTokenInCookie(SSOCOOKIES.ACCESS_TOKEN, res.accessToken);
+        }
+        if (res?.refreshToken) {
+          setTokenInCookie(SSOCOOKIES.REFRESH_TOKEN, res.refreshToken);
+        }
+        if (res?.accessToken) {
           navigate("/dashboard");
         }
       } catch (error) {

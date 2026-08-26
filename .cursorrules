@@ -1,0 +1,105 @@
+# Agent Guidelines & Project Architecture - my-ytb-social
+
+Welcome, AI Agent! This file outlines the architectural standards, code style, technology stack, and directory structure of the `my-ytb-social` repository. Please read this file carefully and adhere to these guidelines for all code edits, additions, and refactors.
+
+---
+
+## 🛠 Tech Stack & Key Libraries
+
+- **Framework**: React 19.x (TypeScript)
+- **Bundler**: Vite 7.x
+- **Styling**: Tailwind CSS v3 + SCSS (Sass Embedded)
+- **Routing**: `react-router-dom` v7 (using data router `createBrowserRouter`)
+- **Forms & Validation**: `react-hook-form` + `yup` + `@hookform/resolvers`
+- **Component Documentation**: Storybook v10
+- **Testing**: Vitest + Playwright (Storybook component test runner)
+- **Module Federation**: `@originjs/vite-plugin-federation` (Exposes `./src/App.tsx` as `my_ytb_social_remote`)
+- **Icon Libraries**: `@quanghuy/ytb-icon-library` (local dependency) and `lucide-react`
+
+---
+
+## 📁 Directory Structure & Architecture
+
+The project follows a modified **Atomic Design** pattern paired with modular SCSS.
+
+```
+src/
+├── assets/             # Static assets (images, fonts, etc.)
+├── atoms/              # Smallest UI units (Button, Input, Badge, Select, Avatar, etc.)
+├── molecules/          # Combinations of atoms (CardPost, form fields, etc.)
+├── organisms/          # Complex UI components/wrappers (AuthWrapper, GuestWrapper)
+├── pages/              # Page components (Dashboard, Login, Register)
+├── features/           # Specific product feature logic
+├── hook/               # Custom React hooks
+├── services/           # API and data fetching services (Axios instances)
+├── constants/          # Static application constants
+├── lib/                # Third-party configurations or libraries
+├── utils/              # Helper utility functions (*.utils.ts)
+├── style/              # Global SCSS styles and tokens
+│   ├── abstracts/      # SCSS variables, colors, typography, mixins
+│   ├── base/           # Resets and global HTML element styling
+│   ├── components/     # Component-specific styles mapping to Atomic categories
+│   │   ├── atoms/
+│   │   └── molecules/
+│   └── themes/         # Theme configurations
+├── main.tsx            # Main application entry point
+├── App.tsx             # Root component (exposed via module federation)
+└── router.tsx          # App routing config
+```
+
+---
+
+## 🎨 Design System & Styling Rules
+
+1. **SCSS + Tailwind Integration**:
+   - Styling is written in BEM-structured SCSS under `src/style/components/`.
+   - Tailwind utility classes are integrated inside SCSS components using `@apply`.
+   - Never write inline styles. Avoid using too many ad-hoc Tailwind utility classes directly in React component `className`s if they are primitive components (Atoms). Instead, style them in their corresponding SCSS file.
+   
+2. **Design Tokens & CSS Variables**:
+   - Colors, spacing, and typography are defined in `src/style/abstracts/` using CSS custom properties (variables) on `:root`.
+   - These variables are mapped into Tailwind in `tailwind.config.js` (e.g., `theme('colors.primary.400')`, `bg-primary-400`, `p-xs`, etc.).
+   - **Rule**: Do not hardcode hex/rgb colors or pixel offsets. Use the configured Tailwind classes/functions or SCSS theme variables.
+
+3. **Global CSS Import**:
+   - `src/index.css` acts as the master manifest, importing all component styles and Tailwind directives. When adding a new component stylesheet, import it in `src/index.css`.
+
+---
+
+## 📦 Component Implementation Standards
+
+When creating or modifying components in `atoms/`, `molecules/`, or `organisms/`, you must follow these rules:
+
+1. **Folder Structure**:
+   For a component named `MyComponent`:
+   - Create directory `src/atoms/my-component/` (or matching directory).
+   - Implement component in `MyComponent.tsx` (export default).
+   - Export through `index.ts` (e.g., `export { default } from './MyComponent'`).
+   - Write stories in `my-component.stories.tsx` next to the component.
+   - Create style file `src/style/components/atoms/my-component.scss` and import it in `src/index.css`.
+
+2. **Types & Refs**:
+   - Use TypeScript interfaces prefixed with `I` (e.g., `IButtonProps`) or specific component prop types.
+   - For components rendering underlying HTML inputs or interactive tags (like inputs, buttons, selects), use `React.forwardRef` so they work seamlessly with `react-hook-form`.
+
+3. **Example Structure**:
+   - View `src/atoms/button/` or `src/atoms/input/` as golden reference implementations.
+
+---
+
+## ⚙️ Core CLI Commands
+
+- **Start Dev Server**: `npm run dev`
+- **Build Production**: `npm run build`
+- **Lint Code**: `npm run lint`
+- **Start Storybook**: `npm run storybook`
+- **Build Storybook**: `npm run build-storybook`
+
+---
+
+## 🤖 General Agent Instructions
+
+- **Maintain Types**: Ensure all props are explicitly typed. Do not use `any`.
+- **Maintain Design Alignment**: Check the styling of existing components when adding new ones. Do not introduce raw Tailwind values like `bg-[#ff0000]` unless absolutely necessary. Use tokenized colors (`bg-primary-400`, `bg-error-400`, etc.).
+- **Code Comments**: Keep existing comments intact. Write clean self-documenting code.
+- **Micro-frontends**: Remember that `App.tsx` is exposed to other applications via Vite Federation. Do not add page-level state or layout assumptions to `App.tsx` that might break it when running as a remote module.

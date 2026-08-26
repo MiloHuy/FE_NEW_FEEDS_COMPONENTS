@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Toaster from "./Toast";
 import { toast } from "./toast.svc";
 
@@ -68,6 +68,44 @@ function TriggerButton({
       {label}
     </button>
   );
+}
+
+function PersistentToastStory(args: React.ComponentProps<typeof Toaster>) {
+  const toastIdRef = useRef<string | null>(null);
+
+  return (
+    <>
+      <div style={{ display: "flex", gap: 10 }}>
+        <TriggerButton
+          label="Show persistent"
+          color="#0ea5e9"
+          onClick={() => {
+            toastIdRef.current = toast.info("Uploading files...", { duration: 0 });
+          }}
+        />
+        <TriggerButton
+          label="Dismiss it"
+          color="#64748b"
+          onClick={() => {
+            if (toastIdRef.current) toast.dismiss(toastIdRef.current);
+          }}
+        />
+      </div>
+      <Toaster {...args} />
+    </>
+  );
+}
+
+function AutoFireToastStory(args: React.ComponentProps<typeof Toaster>) {
+  useEffect(() => {
+    toast.success("Auto-fired on mount!");
+    toast.error("Something went wrong", { description: "Check the logs." });
+    toast.warning("Disk space low", {
+      action: { label: "Free up space", onClick: () => {} },
+    });
+  }, []);
+
+  return <Toaster {...args} />;
 }
 
 export const AllVariants: Story = {
@@ -147,28 +185,7 @@ export const WithAction: Story = {
 
 export const Persistent: Story = {
   args: { position: "bottom-right" },
-  render: (args) => {
-    let toastId: string;
-    return (
-      <>
-        <div style={{ display: "flex", gap: 10 }}>
-          <TriggerButton
-            label="Show persistent"
-            color="#0ea5e9"
-            onClick={() => {
-              toastId = toast.info("Uploading files…", { duration: 0 });
-            }}
-          />
-          <TriggerButton
-            label="Dismiss it"
-            color="#64748b"
-            onClick={() => toast.dismiss(toastId)}
-          />
-        </div>
-        <Toaster {...args} />
-      </>
-    );
-  },
+  render: (args) => <PersistentToastStory {...args} />,
 };
 
 export const DismissAll: Story = {
@@ -209,15 +226,5 @@ export const Positions: Story = {
 
 export const AutoFire: Story = {
   args: { position: "bottom-right" },
-  render: (args) => {
-    useEffect(() => {
-      toast.success("Auto-fired on mount!");
-      toast.error("Something went wrong", { description: "Check the logs." });
-      toast.warning("Disk space low", {
-        action: { label: "Free up space", onClick: () => {} },
-      });
-    }, []);
-
-    return <Toaster {...args} />;
-  },
+  render: (args) => <AutoFireToastStory {...args} />,
 };

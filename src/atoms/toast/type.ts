@@ -23,6 +23,7 @@ export interface ToastOptions {
 export type ToastEvent =
   | { type: "add"; payload: ToastItem }
   | { type: "dismiss"; payload: { id: string } }
+  | { type: "dismissMany"; payload: { ids: string[] } }
   | { type: "dismissAll" };
 
 export interface ToasterProps {

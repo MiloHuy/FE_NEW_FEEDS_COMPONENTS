@@ -16,9 +16,11 @@ const FormRegister = () => {
     onSubmit: async (values) => {
       try {
         const res = await registerSvcCaller.execute(values);
-        const token = res?.accessToken
-        if (token) {
-          setTokenInCookie(SSOCOOKIES.ACCESS_TOKEN, token);
+        if (res?.accessToken) {
+          setTokenInCookie(SSOCOOKIES.ACCESS_TOKEN, res.accessToken);
+        }
+        if (res?.refreshToken) {
+          setTokenInCookie(SSOCOOKIES.REFRESH_TOKEN, res.refreshToken);
         }
         navigate("/dashboard");
       } catch (error) {
@@ -48,6 +50,22 @@ const FormRegister = () => {
           helperText={getError("email")} 
           state={
             getError("email") ? "error" : "default"
+        } />
+
+        <Input 
+          {...register("firstName")} 
+          placeholder="First Name" 
+          helperText={getError("firstName")} 
+          state={
+            getError("firstName") ? "error" : "default"
+        } />
+
+        <Input 
+          {...register("lastName")} 
+          placeholder="Last Name" 
+          helperText={getError("lastName")} 
+          state={
+            getError("lastName") ? "error" : "default"
         } />
 
         <Input 

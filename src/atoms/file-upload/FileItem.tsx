@@ -11,6 +11,11 @@ interface FileItemProps {
 
 export function FileItem({ file, onRemove, status, uploadError }: FileItemProps) {
   const preview = URL.createObjectURL(file);
+  const statusLabel = status === "uploading"
+    ? "Uploading"
+    : status === "success"
+    ? "Uploaded"
+    : uploadError ?? "Upload failed";
 
   return (
     <div className="file-upload__item">
@@ -24,6 +29,7 @@ export function FileItem({ file, onRemove, status, uploadError }: FileItemProps)
       <div className="file-upload__item-info">
         <span className="file-upload__item-name">{file.name}</span>
         <span className="file-upload__item-size">{formatBytes(file.size)}</span>
+        <span className="file-upload__item-status">{statusLabel}</span>
       </div>
       
       <Button

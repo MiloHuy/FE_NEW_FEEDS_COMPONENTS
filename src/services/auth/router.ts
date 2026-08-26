@@ -5,5 +5,6 @@ export const API_AUTH_ROUTERS = {
   POST: {
     LOGIN: "auth/login",
     REGISTER: "auth/register",
+    REFRESH_TOKEN: "auth/refresh-token",
   }
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import clsx from "clsx";
 import type { ToasterProps, ToastItem, ToastVariant } from "./type";
 import { toast } from "./toast.svc";
@@ -19,9 +19,16 @@ function ToastCard({ item }: { item: ToastItem }) {
 
   const timerRef    = useRef<ReturnType<typeof setTimeout>>(undefined);
   const intervalRef = useRef<ReturnType<typeof setInterval>>(undefined);
-  const startedAt   = useRef(Date.now());
+  const rafRef      = useRef<number | undefined>(undefined);
+  const startedAt   = useRef(0);
   const remaining   = useRef(item.duration ?? 4000);
+  const fullDuration = useRef(item.duration ?? 4000);
   const paused      = useRef(false);
+
+  const clearTimers = useCallback(() => {
+    clearTimeout(timerRef.current);
+    clearInterval(intervalRef.current);
+  }, []);
 
   const dismiss = useCallback(() => {
     setVisible(false);
@@ -31,8 +38,15 @@ function ToastCard({ item }: { item: ToastItem }) {
 
   const startTimer = useCallback(() => {
     if (item.duration === 0) return;
+
+    clearTimers();
+    const dur = Math.max(0, remaining.current);
+
+    if (dur === 0) {
+      dismiss();
+      return;
+    }
     
-    const dur = remaining.current;
     startedAt.current = Date.now();
     timerRef.current    = setTimeout(dismiss, dur);
     
@@ -40,20 +54,21 @@ function ToastCard({ item }: { item: ToastItem }) {
       if (paused.current) return;
       
       const elapsed = Date.now() - startedAt.current;
+      const nextRemaining = Math.max(0, dur - elapsed);
       
-      setProgress(Math.max(0, 100 - (elapsed / dur) * 100));
+      setProgress(Math.max(0, (nextRemaining / fullDuration.current) * 100));
     }, 30);
 
-  }, [dismiss, item.duration]);
+  }, [clearTimers, dismiss, item.duration]);
 
   const pauseTimer = () => {
     if (item.duration === 0) return;
     
     paused.current = true;
-    remaining.current -= Date.now() - startedAt.current;
+    remaining.current = Math.max(0, remaining.current - (Date.now() - startedAt.current));
+    setProgress(Math.max(0, (remaining.current / fullDuration.current) * 100));
     
-    clearTimeout(timerRef.current);
-    clearInterval(intervalRef.current);
+    clearTimers();
   };
 
   const resumeTimer = () => {
@@ -63,14 +78,18 @@ function ToastCard({ item }: { item: ToastItem }) {
   };
 
   useEffect(() => {
-    requestAnimationFrame(() => setVisible(true));
-    startTimer();
+    rafRef.current = requestAnimationFrame(() => {
+      setVisible(true);
+      startTimer();
+    });
     
     return () => {
-      clearTimeout(timerRef.current);
-      clearInterval(intervalRef.current);
+      if (rafRef.current !== undefined) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      clearTimers();
     };
-  }, []);
+  }, [clearTimers, startTimer]);
 
   const variant = item.variant ?? "default";
 
@@ -92,7 +111,7 @@ function ToastCard({ item }: { item: ToastItem }) {
         {item.action && (
           <button
             className="toast-card__action"
-            onClick={() => { item.action!.onClick(); dismiss(); }}
+            onClick={() => { item.action?.onClick(); dismiss(); }}
           >
             {item.action.label}
           </button>
@@ -112,10 +131,23 @@ function ToastCard({ item }: { item: ToastItem }) {
 
 function Toaster({ position = "bottom-right", maxToasts = 5 }: ToasterProps) {
   const items = useToastItems();
+  const visibleLimit = Math.max(0, maxToasts);
+  const visibleItems = useMemo(
+    () => visibleLimit === 0 ? [] : items.slice(-visibleLimit),
+    [items, visibleLimit],
+  );
+
+  useEffect(() => {
+    const overflowCount = items.length - visibleLimit;
+
+    if (overflowCount > 0) {
+      toast.dismissMany(items.slice(0, overflowCount).map((item) => item.id));
+    }
+  }, [items, visibleLimit]);
 
   return (
     <div className={clsx("toaster", `toaster--${position}`)}>
-      {items.slice(-maxToasts).map((item) => (
+      {visibleItems.map((item) => (
         <ToastCard key={item.id} item={item} />
       ))}
     </div>

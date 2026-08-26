@@ -23,7 +23,7 @@ const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(
       className,
       ...rest
     },
-    _ref
+    ref
   ) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [entries, setEntries] = useState<FileEntry[]>([]);
@@ -50,9 +50,11 @@ const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(
 
         for (const file of incoming) {
           const result = validateFile(file, maxBytes);
-          result.valid
-            ? validFiles.push(file)
-            : validationErrors.push(result.message!);
+          if (result.valid) {
+            validFiles.push(file);
+          } else {
+            validationErrors.push(result.message!);
+          }
         }
 
         if (validationErrors.length) {
@@ -143,7 +145,15 @@ const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(
     return (
       <div className={clsx("file-upload", className)}>
         <input
-          ref={inputRef}
+          ref={(node) => {
+            inputRef.current = node;
+
+            if (typeof ref === "function") {
+              ref(node);
+            } else if (ref) {
+              ref.current = node;
+            }
+          }}
           type="file"
           accept={IMAGE_ACCEPT}
           multiple={multiple}

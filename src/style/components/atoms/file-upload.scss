@@ -56,6 +56,10 @@
       @apply text-xs-2 text-neutral-400;
     }
 
+    &__item-status {
+      @apply text-xs-2 text-neutral-400;
+    }
+
     &__item-remove {
       @apply shrink-0 inline-flex items-center justify-center w-lg-2 h-lg-2 border-none rounded-full bg-neutral-200 text-neutral-500 text-2xs cursor-pointer p-0 transition-colors duration-150;
 
